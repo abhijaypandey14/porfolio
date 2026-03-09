@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ABHIJAY PANDEY — Portfolio</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Syne:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
+</head>
+<body>
+  <div id="root">
+    <div class="initial-loader"><div class="loader-pulse"></div></div>
+  </div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useCallback, useMemo } = React;
+    gsap.registerPlugin(ScrollTrigger);
+
+    /* ===== DATA ===== */
+    const SKILLS = {
+      dev: [
+        { name: 'C / C++', pct: 90 }, { name: 'Python', pct: 85 },
+        { name: 'Java', pct: 75 }, { name: 'SQL', pct: 80 },
+        { name: 'React', pct: 70 }, { name: 'Node.js', pct: 72 }
+      ],
+      ai: [
+        { name: 'MLOps', pct: 78 }, { name: 'Neural Networks', pct: 82 },
+        { name: 'NLP', pct: 76 }, { name: 'Tableau', pct: 70 },
+        { name: 'Data Science', pct: 80 }
+      ],
+      tech: [
+        { name: 'AWS S3 / EC2', pct: 75 }, { name: 'Docker', pct: 72 },
+        { name: 'TCP/IP', pct: 80 }, { name: 'Cloud Security', pct: 78 },
+        { name: 'Encryption', pct: 74 }
+      ]
+    };
+
+    const PROJECTS = [
+      { name: 'Project AMD', code: 'AMD', desc: 'Web Application, HTML', tags: 'Development, Design', url: 'https://github.com/abhijaypandey14/project-AMD' },
+      { name: 'Project GoT', code: 'GoT', desc: 'Web Application, HTML', tags: 'Development, Frontend', url: 'https://github.com/abhijaypandey14/project-GoT' },
+      { name: 'Q1 — Systems', code: 'Q1', desc: 'C Programming', tags: 'Systems, Low-Level', url: 'https://github.com/abhijaypandey14/q1' },
+      { name: 'Interview-C', code: 'C', desc: 'C, Data Structures', tags: 'Algorithms, Practice', url: 'https://github.com/abhijaypandey14/interview-C' }
+    ];
+
+    const CERTS = [
+      { name: 'AWS EDUCATE: CLOUD 101', cat: 'Introduction to Cloud', from: 'Amazon Web Services', img: 'blob.png', alt: 'AWS Cloud 101 Badge' },
+      { name: 'GETTING STARTED WITH DATA', cat: 'Data Fundamentals', from: 'IBM Skills Build', img: 'Getting_20Started_20With_20Data_20Badge.png', alt: 'IBM Data Badge' },
+      { name: 'AWS EDUCATE: GENERATIVE AI', cat: 'Introduction to Gen AI', from: 'Amazon Web Services', img: 'blob (1).png', alt: 'AWS Gen AI Badge' }
+    ];
+
+    const MARQUEE_ITEMS = ['PYTHON','REACT','NODE.JS','AWS','DOCKER','AI/ML','JAVA','SQL','C++','NLP','CYBERSECURITY','CLOUD'];
+
+    const ArrowSVG = () => (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+    );
+
+    /* ===== CHAR SPLIT ===== */
+    function CharSplit({ text }) {
+      return text.split('').map((c, i) => (
+        <span key={i} className="char" style={{ display: 'inline-block', opacity: 0, transform: 'translateY(50px) rotate(8deg)' }}>
+          {c === ' ' ? '\u00A0' : c}
+        </span>
+      ));
+    }
+
+    /* ===== LINE REVEAL ===== */
+    function LineReveal({ children }) {
+      return (
+        <span className="split-text" data-animation="slide-up">
+          <span className="line"><span className="line-inner">{children}</span></span>
+        </span>
+      );
+    }
+
+    /* ===== CINEMATIC PRELOADER ===== */
+    function Preloader({ onComplete }) {
+      const ref = useRef(null);
+      const [progress, setProgress] = useState(0);
+      const [wordIdx, setWordIdx] = useState(0);
+      const finishedRef = useRef(false);
+      const words = ['Developer', 'Engineer', 'Creator', 'Visionary'];
+
+      useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        const timer = setInterval(() => {
+          setProgress(p => {
+            const next = p + Math.random() * 6 + 1.5;
+            return next >= 100 ? 100 : next;
+          });
+        }, 60);
+        const wordTimer = setInterval(() => setWordIdx(i => (i + 1) % words.length), 700);
+        return () => { clearInterval(timer); clearInterval(wordTimer); };
+      }, []);
+
+      useEffect(() => {
+        if (progress >= 100 && !finishedRef.current) {
+          finishedRef.current = true;
+          setTimeout(() => {
+            const el = ref.current;
+            if (!el) return;
+            gsap.to(el.querySelector('.preloader-inner'), {
+              scale: 0.9, opacity: 0, duration: 0.5, ease: 'power3.in'
+            });
+            gsap.to(el, {
+              clipPath: 'inset(0 0 100% 0)', duration: 1.4,
+              ease: 'power4.inOut', delay: 0.4,
+              onComplete: () => {
+                if (el) el.style.display = 'none';
+                document.body.style.overflow = '';
+                onComplete();
+              }
+            });
+          }, 500);
+        }
+      }, [progress]);
+
+      return (
+        <div className="preloader" ref={ref}>
+          <div className="preloader-grain"></div>
+          <div className="preloader-inner">
+            <div className="preloader-logo">
+              <span className="pl-letter">A</span><span className="pl-letter">B</span>
+              <span className="pl-letter">H</span><span className="pl-letter">I</span>
+              <span className="pl-letter">J</span><span className="pl-letter">A</span>
+              <span className="pl-letter">Y</span>
+            </div>
+            <div className="preloader-counter">
+              <span className="counter-num">{String(Math.round(progress)).padStart(3, '0')}</span>
+            </div>
+            <div className="preloader-bar">
+              <div className="preloader-fill" style={{ width: progress + '%' }}></div>
+            </div>
+            <div className="preloader-words">
+              {words.map((w, i) => (
+                <div key={i} className={`pw-line ${i === wordIdx ? 'active' : ''} ${i === (wordIdx === 0 ? words.length - 1 : wordIdx - 1) ? 'exit' : ''}`}>
+                  <span>{w}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    /* ===== CUSTOM CURSOR ===== */
+    function CustomCursor() {
+      const cursorRef = useRef(null);
+      const dotRef = useRef(null);
+      const textRef = useRef(null);
+
+      useEffect(() => {
+        const cursor = cursorRef.current;
+        const dot = dotRef.current;
+        const textEl = textRef.current;
+        let mx = -100, my = -100, cx = -100, cy = -100;
+
+        const onMove = (e) => {
+          mx = e.clientX; my = e.clientY;
+          dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+        };
+        document.addEventListener('mousemove', onMove);
+
+        let rafId;
+        function tick() {
+          cx += (mx - cx) * 0.1; cy += (my - cy) * 0.1;
+          cursor.style.left = cx + 'px'; cursor.style.top = cy + 'px';
+          rafId = requestAnimationFrame(tick);
+        }
+        rafId = requestAnimationFrame(tick);
+
+        const setupHovers = () => {
+          document.querySelectorAll('a, button, .magnetic-wrap').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => { cursor.classList.remove('hover'); cursor.classList.remove('text-mode'); textEl.textContent = ''; });
+          });
+          document.querySelectorAll('[data-cursor]').forEach(el => {
+            el.addEventListener('mouseenter', () => { cursor.classList.add('text-mode'); textEl.textContent = el.dataset.cursor; });
+            el.addEventListener('mouseleave', () => { cursor.classList.remove('text-mode'); textEl.textContent = ''; });
+          });
+        };
+        setTimeout(setupHovers, 600);
+
+        return () => { document.removeEventListener('mousemove', onMove); cancelAnimationFrame(rafId); };
+      }, []);
+
+      return (
+        <>
+          <div className="cursor" ref={cursorRef}><span className="cursor-text" ref={textRef}></span></div>
+          <div className="cursor-dot" ref={dotRef}></div>
+        </>
+      );
+    }
+
+    /* ===== NAVIGATION ===== */
+    function Navigation({ menuOpen, setMenuOpen }) {
+      return (
+        <>
+          <nav className="nav" id="nav">
+            <a href="#hero" className="nav-logo magnetic-wrap">
+              <span className="magnetic-area" data-strength="25">ABHIJAY<span className="nav-logo-light">PANDEY</span></span>
+            </a>
+            <div className="nav-center">
+              {['about','skills','projects','experience','contact'].map(s => (
+                <a key={s} href={`#${s}`} className="nav-link magnetic-wrap">
+                  <span className="magnetic-area" data-strength="20">{s === 'skills' ? 'Expertise' : s.charAt(0).toUpperCase() + s.slice(1)}</span>
+                </a>
+              ))}
+            </div>
+            <button className="nav-menu-btn magnetic-wrap" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+              <span className="magnetic-area" data-strength="30">
+                <div className={`hamburger ${menuOpen ? 'active' : ''}`}>
+                  <span></span><span></span><span></span>
+                </div>
+              </span>
+            </button>
+          </nav>
+          <div className={`mobile-menu ${menuOpen ? 'open' : ''}`}>
+            <div className="mm-inner">
+              <div className="mm-links">
+                {[['#hero','Home',1],['#about','About',2],['#skills','Expertise',3],['#projects','Projects',4],['#experience','Experience',5],['#contact','Contact',6]].map(([h,t,n]) => (
+                  <a key={h} href={h} className="mm-link" onClick={() => setMenuOpen(false)}>
+                    <span className="mm-num">0{n}</span><span className="mm-text">{t}</span>
+                  </a>
+                ))}
+              </div>
+              <div className="mm-footer">
+                <a href="https://github.com/abhijaypandey14" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="https://www.linkedin.com/in/abhijay-pandey-387211293" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+                <a href="mailto:abhijaypandeygu@gmail.com">Email</a>
+              </div>
+            </div>
+          </div>
+        </>
+      );
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    function ProgressBar() {
+      const fillRef = useRef(null);
+      useEffect(() => {
+        const onScroll = () => {
+          const y = window.scrollY;
+          const docH = document.documentElement.scrollHeight - window.innerHeight;
+          if (fillRef.current && docH > 0) fillRef.current.style.width = (y / docH * 100) + '%';
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+      }, []);
+      return <div className="progress-bar"><div className="pb-fill" ref={fillRef}></div></div>;
+    }
+
+    /* ===== AUDIO PLAYER ===== */
+    function AudioPlayer() {
+      const [playing, setPlaying] = useState(false);
+      const audioRef = useRef(null);
+
+      useEffect(() => {
+        audioRef.current = new Audio('Game of Thrones.mp3');
+        audioRef.current.loop = true;
+        audioRef.current.volume = 0.25;
+        return () => { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; } };
+      }, []);
+
+      const toggle = () => {
+        if (!audioRef.current) return;
+        if (playing) audioRef.current.pause();
+        else audioRef.current.play().catch(() => {});
+        setPlaying(!playing);
+      };
+
+      return (
+        <button className={`audio-toggle ${playing ? 'playing' : ''}`} onClick={toggle} aria-label="Toggle GoT theme">
+          <span className="audio-label">{playing ? 'PLAYING' : 'PLAY THEME'}</span>
+          {playing ? (
+            <div className="audio-bars"><span></span><span></span><span></span><span></span></div>
+          ) : (
+            <div className="audio-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" stroke="none"/>
+              </svg>
+            </div>
+          )}
+        </button>
+      );
+    }
+
+    /* ===== SECTION DIVIDER ===== */
+    function SectionDivider({ type = 'glow' }) {
+      const ref = useRef(null);
+      useEffect(() => {
+        if (!ref.current) return;
+        gsap.from(ref.current, {
+          opacity: 0, scaleX: 0.3, duration: 1.2, ease: 'power3.out',
+          scrollTrigger: { trigger: ref.current, start: 'top 92%' }
+        });
+      }, []);
+
+      if (type === 'glow') {
+        return (
+          <div ref={ref} className="section-divider divider-glow">
+            <div className="divider-line"><div className="divider-dot"></div></div>
+          </div>
+        );
+      }
+      if (type === 'cosmic') {
+        const stars = Array.from({ length: 20 }, (_, i) => (
+          <div key={i} className="star-particle" style={{
+            left: (Math.random() * 100) + '%', top: (Math.random() * 100) + '%',
+            '--dur': (2 + Math.random() * 3) + 's', animationDelay: (Math.random() * 2) + 's'
+          }}/>
+        ));
+        return (
+          <div ref={ref} className="section-divider divider-cosmic">
+            <div className="divider-line"></div>
+            {stars}
+          </div>
+        );
+      }
+      if (type === 'ember') {
+        const embers = Array.from({ length: 15 }, (_, i) => (
+          <div key={i} className="ember-dot" style={{
+            left: (Math.random() * 100) + '%', bottom: '0',
+            '--dur': (2 + Math.random() * 4) + 's', animationDelay: (Math.random() * 3) + 's'
+          }}/>
+        ));
+        return (
+          <div ref={ref} className="section-divider divider-ember">
+            <div className="divider-line ember-line"></div>
+            {embers}
+          </div>
+        );
+      }
+      if (type === 'neon') {
+        return (
+          <div ref={ref} className="section-divider divider-neon">
+            <div className="divider-line"></div>
+          </div>
+        );
+      }
+      return <div ref={ref} className="section-divider divider-gradient" />;
+    }
+
+    /* ===== HERO — CINEMATIC VOID THEME ===== */
+    function HeroSection({ loaded }) {
+      const canvasRef = useRef(null);
+      const sectionRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || typeof THREE === 'undefined') return;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        camera.position.set(0, 0, 4);
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Particle sphere
+        const count = 4000, positions = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos(2 * Math.random() - 1);
+          const r = 1.6 + (Math.random() - 0.5) * 0.2;
+          positions[i*3] = r*Math.sin(phi)*Math.cos(theta);
+          positions[i*3+1] = r*Math.sin(phi)*Math.sin(theta);
+          positions[i*3+2] = r*Math.cos(phi);
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const sphere = new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.008, color: 0xece7e1, transparent: true, opacity: 0.6, sizeAttenuation: true }));
+        scene.add(sphere);
+
+        // Wireframe icosahedron
+        const ico = new THREE.Mesh(new THREE.IcosahedronGeometry(1.4, 1), new THREE.MeshBasicMaterial({ color: 0xece7e1, wireframe: true, transparent: true, opacity: 0.04 }));
+        scene.add(ico);
+
+        // Orbital ring
+        const ring1 = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.003, 16, 128), new THREE.MeshBasicMaterial({ color: 0xece7e1, transparent: true, opacity: 0.1 }));
+        ring1.rotation.x = Math.PI / 3;
+        scene.add(ring1);
+
+        const ring2 = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.002, 16, 128), new THREE.MeshBasicMaterial({ color: 0x8888ff, transparent: true, opacity: 0.06 }));
+        ring2.rotation.x = Math.PI / 2.2;
+        ring2.rotation.y = Math.PI / 6;
+        scene.add(ring2);
+
+        // Floating dust
+        const dustCount = 500, dustPos = new Float32Array(dustCount * 3);
+        for (let d = 0; d < dustCount; d++) {
+          dustPos[d*3] = (Math.random()-0.5)*8;
+          dustPos[d*3+1] = (Math.random()-0.5)*8;
+          dustPos[d*3+2] = (Math.random()-0.5)*8;
+        }
+        const dGeo = new THREE.BufferGeometry();
+        dGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+        const dust = new THREE.Points(dGeo, new THREE.PointsMaterial({ size: 0.015, color: 0xaaaaff, transparent: true, opacity: 0.15, sizeAttenuation: true }));
+        scene.add(dust);
+
+        let mouseNX = 0, mouseNY = 0;
+        const onMouse = (e) => { mouseNX = (e.clientX / window.innerWidth) * 2 - 1; mouseNY = (e.clientY / window.innerHeight) * 2 - 1; };
+        document.addEventListener('mousemove', onMouse);
+
+        let animId, time = 0;
+        function animate() {
+          animId = requestAnimationFrame(animate);
+          time += 0.01;
+          sphere.rotation.y += 0.0015; sphere.rotation.x += 0.0003;
+          ico.rotation.y -= 0.0008; ico.rotation.x += 0.0005;
+          ring1.rotation.z += 0.0008;
+          ring2.rotation.z -= 0.0006;
+          dust.rotation.y += 0.0002;
+          // Breathing scale
+          const breath = 1 + Math.sin(time * 0.5) * 0.02;
+          sphere.scale.setScalar(breath);
+          ico.scale.setScalar(breath * 0.98);
+
+          camera.position.x += (mouseNX * 0.4 - camera.position.x) * 0.015;
+          camera.position.y += (-mouseNY * 0.3 - camera.position.y) * 0.015;
+          camera.lookAt(scene.position);
+          renderer.render(scene, camera);
+        }
+        animate();
+
+        const onResize = () => {
+          const w = canvas.clientWidth, h = canvas.clientHeight;
+          if (w && h) { camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); }
+        };
+        window.addEventListener('resize', onResize);
+        return () => { cancelAnimationFrame(animId); document.removeEventListener('mousemove', onMouse); window.removeEventListener('resize', onResize); renderer.dispose(); };
+      }, []);
+
+      useEffect(() => {
+        if (!loaded) return;
+        const el = sectionRef.current;
+        if (!el) return;
+        const tl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+        tl.to(el.querySelectorAll('.hero-title .char'), { opacity: 1, y: 0, rotation: 0, stagger: 0.025, duration: 0.8 }, 0.1)
+          .from(el.querySelector('.hero-greeting'), { opacity: 0, x: -40, duration: 1 }, 0)
+          .from(el.querySelector('.hero-sub'), { opacity: 0, y: 40, duration: 1 }, 0.5)
+          .from(el.querySelector('.hero-btn'), { opacity: 0, y: 30, duration: 0.8 }, 0.7)
+          .from(el.querySelector('.hero-scroll'), { opacity: 0, duration: 0.8 }, 1)
+          .from(el.querySelector('.hero-meta'), { opacity: 0, y: 20, duration: 0.8 }, 1)
+          .from(el.querySelector('.hero-bg-word'), { opacity: 0, scale: 0.95, duration: 1.5 }, 0);
+      }, [loaded]);
+
+      return (
+        <section className="hero" id="hero" ref={sectionRef}>
+          <canvas id="hero-canvas" ref={canvasRef}></canvas>
+          <div className="hero-overlay"></div>
+          <div className="hero-vignette"></div>
+          <div className="hero-grain"></div>
+          <div className="hero-bg-word" aria-hidden="true">AP</div>
+          <div className="hero-content">
+            <div className="hero-greeting">
+              <span className="accent-line"></span>
+              <span>Welcome to my universe</span>
+            </div>
+            <h1 className="hero-title">
+              <span className="hero-line"><span className="hero-line-inner"><CharSplit text="ABHIJAY" /></span></span>
+              <span className="hero-line"><span className="hero-line-inner stroke-text"><CharSplit text="PANDEY" /></span></span>
+            </h1>
+            <div className="hero-sub">
+              <p>More than a portfolio — a cinematic journey through code, creativity, and the relentless pursuit of engineering excellence.</p>
+            </div>
+            <a href="#about" className="hero-btn magnetic-wrap btn-ripple">
+              <span className="magnetic-area" data-strength="15">
+                <span>START EXPLORING</span>
+                <span className="arrow-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></span>
+              </span>
+            </a>
+          </div>
+          <div className="hero-scroll"><div className="scroll-bar"></div><span>SCROLL</span></div>
+          <div className="hero-meta"><span>Developer &amp; Engineer</span><span>Galgotias University</span></div>
+        </section>
+      );
+    }
+
+    /* ===== ENTHUSIAST ===== */
+    function EnthusiastSection() {
+      const ref = useRef(null);
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        gsap.to(el.querySelectorAll('[data-animation="char"] .char'), {
+          y: 0, opacity: 1, rotation: 0, stagger: 0.02, duration: 0.7, ease: 'power3.out',
+          scrollTrigger: { trigger: el, start: 'top 80%' }
+        });
+        gsap.fromTo(el.querySelectorAll('.enth-card'),
+          { y: 80, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.1, duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: el.querySelector('.enth-grid'), start: 'top 85%' }
+          });
+      }, []);
+
+      const items = [
+        { t: 'Technology', l: ['AI & ML','Cloud Computing','Full Stack Dev'], icon: '{ }' },
+        { t: 'Security', l: ['Cybersecurity','Cloud Security','Encryption'], icon: '🛡' },
+        { t: 'Data', l: ['Data Science','Neural Networks','NLP'], icon: '◈' },
+        { t: 'DevOps', l: ['Docker','AWS','MLOps'], icon: '⚙' }
+      ];
+
+      return (
+        <section className="full-section enth-section" data-speed="0.95" ref={ref}>
+          <div className="wrapper">
+            <h2 className="mega-heading">
+              <span className="mh-row" data-animation="char"><CharSplit text="The " /><span className="mh-italic-inline"><CharSplit text="Enthusiast" /></span><CharSplit text=" For" /></span>
+            </h2>
+            <div className="enth-grid">
+              {items.map((it, i) => (
+                <div key={i} className="enth-card" data-cursor="Explore">
+                  <span className="enth-icon">{it.icon}</span>
+                  <h4>{it.t}</h4>
+                  <ul>{it.l.map((s, j) => <li key={j}><span className="enth-bullet"></span>{s}</li>)}</ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== ABOUT — DEEP SPACE / GALAXY THEME ===== */
+    function AboutSection() {
+      const ref = useRef(null);
+      const canvasRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || typeof THREE === 'undefined') return;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        camera.position.z = 5;
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Galaxy stars
+        const starCount = 4000, starPos = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount; i++) {
+          starPos[i*3] = (Math.random()-0.5)*25;
+          starPos[i*3+1] = (Math.random()-0.5)*25;
+          starPos[i*3+2] = (Math.random()-0.5)*25;
+        }
+        const sGeo = new THREE.BufferGeometry();
+        sGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const stars = new THREE.Points(sGeo, new THREE.PointsMaterial({ size: 0.012, color: 0xdddaff, transparent: true, opacity: 0.8, sizeAttenuation: true }));
+        scene.add(stars);
+
+        // Spiral galaxy
+        const spiralCount = 1200, spiralPos = new Float32Array(spiralCount * 3);
+        for (let k = 0; k < spiralCount; k++) {
+          const a = (k/spiralCount)*Math.PI*8;
+          const rad = 0.2+(k/spiralCount)*3;
+          const sp = (Math.random()-0.5)*0.3;
+          spiralPos[k*3] = Math.cos(a)*rad+sp;
+          spiralPos[k*3+1] = (Math.random()-0.5)*0.12;
+          spiralPos[k*3+2] = Math.sin(a)*rad+sp;
+        }
+        const spGeo = new THREE.BufferGeometry();
+        spGeo.setAttribute('position', new THREE.BufferAttribute(spiralPos, 3));
+        const spiral = new THREE.Points(spGeo, new THREE.PointsMaterial({ size: 0.018, color: 0xaabbff, transparent: true, opacity: 0.45, sizeAttenuation: true }));
+        spiral.rotation.x = Math.PI * 0.38;
+        scene.add(spiral);
+
+        // Nebula dust
+        const dustCount = 800, dustPos = new Float32Array(dustCount * 3);
+        for (let j = 0; j < dustCount; j++) {
+          const t = Math.random()*Math.PI*2, p = Math.acos(2*Math.random()-1), r = 1.5+Math.random()*4;
+          dustPos[j*3] = r*Math.sin(p)*Math.cos(t);
+          dustPos[j*3+1] = r*Math.sin(p)*Math.sin(t);
+          dustPos[j*3+2] = r*Math.cos(p);
+        }
+        const dGeo = new THREE.BufferGeometry();
+        dGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+        const dust = new THREE.Points(dGeo, new THREE.PointsMaterial({ size: 0.05, color: 0x7755bb, transparent: true, opacity: 0.15, sizeAttenuation: true }));
+        scene.add(dust);
+
+        let gmx = 0, gmy = 0;
+        const onMouse = (e) => { gmx = (e.clientX/window.innerWidth)*2-1; gmy = (e.clientY/window.innerHeight)*2-1; };
+        document.addEventListener('mousemove', onMouse);
+
+        let animId;
+        function animate() {
+          animId = requestAnimationFrame(animate);
+          stars.rotation.y += 0.0002; stars.rotation.x += 0.0001;
+          dust.rotation.y -= 0.0004;
+          spiral.rotation.y += 0.0008;
+          camera.position.x += (gmx*0.3-camera.position.x)*0.01;
+          camera.position.y += (-gmy*0.2-camera.position.y)*0.01;
+          camera.lookAt(scene.position);
+          renderer.render(scene, camera);
+        }
+        animate();
+
+        const onResize = () => {
+          const w = canvas.clientWidth, h = canvas.clientHeight;
+          if (w && h) { camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); }
+        };
+        window.addEventListener('resize', onResize);
+        return () => { cancelAnimationFrame(animId); document.removeEventListener('mousemove', onMouse); window.removeEventListener('resize', onResize); renderer.dispose(); };
+      }, []);
+
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        el.querySelectorAll('[data-animation="char"]').forEach(row => {
+          gsap.to(row.querySelectorAll('.char'), {
+            y: 0, opacity: 1, rotation: 0, stagger: 0.02, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: row, start: 'top 82%' }
+          });
+        });
+        gsap.fromTo(el.querySelector('.about-label'), { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: '.about-label', start: 'top 85%' } });
+        gsap.fromTo(el.querySelector('.portrait-box'), { scale: 0.8, opacity: 0, rotateY: 15 }, { scale: 1, opacity: 1, rotateY: 0, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: '.portrait-box', start: 'top 85%' } });
+        gsap.fromTo(el.querySelector('.about-big'), { opacity: 0, y: 40 }, { opacity: 1, y: 0, duration: 1.2, scrollTrigger: { trigger: '.about-big', start: 'top 85%' } });
+        el.querySelectorAll('.about-detail .line-inner').forEach(li => {
+          gsap.to(li, { y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: li.closest('.split-text'), start: 'top 88%' } });
+        });
+      }, []);
+
+      return (
+        <section className="full-section about-section galaxy-theme" id="about" data-speed="0.9" ref={ref}>
+          <canvas id="galaxy-canvas" ref={canvasRef}></canvas>
+          <div className="galaxy-nebula"></div>
+          <div className="stars-layer" aria-hidden="true"></div>
+          <div className="section-grain"></div>
+          <div className="wrapper">
+            <div className="about-top">
+              <h2 className="mega-heading">
+                <span className="mh-row" data-animation="char"><CharSplit text="WHO " /><span className="stroke-text-inline"><CharSplit text="AM I?" /></span></span>
+              </h2>
+              <div className="about-portrait">
+                <div className="portrait-box cube-scene">
+                  <div className="cube-3d">
+                    <div className="cube-face cube-front"><span>&lt;/&gt;</span></div>
+                    <div className="cube-face cube-back"><span>AP</span></div>
+                    <div className="cube-face cube-right"><span>AI</span></div>
+                    <div className="cube-face cube-left"><span>ML</span></div>
+                    <div className="cube-face cube-top"><span>DEV</span></div>
+                    <div className="cube-face cube-bottom"><span>CS</span></div>
+                  </div>
+                  <div className="portrait-text">MY CODE MIGHT<br/>LOOK COMPLEX, BUT<br/>I'M FRIENDLY :)</div>
+                </div>
+              </div>
+            </div>
+            <div className="about-bottom">
+              <div className="about-label"><span className="label-dot"></span> A BIT ABOUT ME?</div>
+              <div className="about-split">
+                <div className="about-big" data-animation="word">
+                  I am a proactive Computer Science student at <em>Galgotias University</em> specializing in the intersection of <em>Data Science, AI/ML, and Cloud Computing</em>.
+                </div>
+                <div className="about-detail">
+                  <p><LineReveal>Adept at building intelligent models and deploying them as scalable cloud-native applications. Complementing core analytical skills with a solid foundation in Full Stack Development, Networking, and Cybersecurity to build secure, data-driven systems.</LineReveal></p>
+                  <p><LineReveal>Currently pursuing B.Tech in Computer Science &amp; Engineering with a GPA of <strong>8.2</strong>. My passion lies in transforming complex problems into elegant, efficient solutions.</LineReveal></p>
+                  <a href="https://github.com/abhijaypandey14" target="_blank" rel="noopener noreferrer" className="link-arrow magnetic-wrap">
+                    <span className="magnetic-area" data-strength="10">MORE ABOUT ME <ArrowSVG /></span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== THEME SHIFT — SPACE→MEDIEVAL ===== */
+    function ThemeShiftSection() {
+      const ref = useRef(null);
+
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        const emberC = el.querySelector('.ember-particles');
+        if (emberC) {
+          for (let i = 0; i < 35; i++) {
+            const e = document.createElement('div');
+            e.classList.add('ember');
+            e.style.left = Math.random()*100+'%';
+            e.style.bottom = '-10px';
+            e.style.animationDuration = (3+Math.random()*5)+'s';
+            e.style.animationDelay = (Math.random()*4)+'s';
+            const sz = (2+Math.random()*4)+'px';
+            e.style.width = sz; e.style.height = sz;
+            emberC.appendChild(e);
+          }
+        }
+
+        ScrollTrigger.create({
+          trigger: el, start: 'top 60%', end: 'bottom 40%',
+          onEnter: () => el.classList.add('shifted'),
+          onLeaveBack: () => el.classList.remove('shifted')
+        });
+
+        el.querySelectorAll('[data-animation="char"]').forEach(row => {
+          gsap.to(row.querySelectorAll('.char'), {
+            y: 0, opacity: 1, rotation: 0, stagger: 0.02, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: row, start: 'top 85%' }
+          });
+        });
+        el.querySelectorAll('[data-animation="slide-up"] .line-inner').forEach(li => {
+          gsap.to(li, { y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: li.closest('.split-text'), start: 'top 88%' } });
+        });
+      }, []);
+
+      return (
+        <section className="full-section trans-section theme-shift-section" ref={ref}>
+          <div className="animated-gradient-bg"></div>
+          <div className="floating-shapes" aria-hidden="true">
+            <div className="shape shape-1"></div><div className="shape shape-2"></div>
+            <div className="shape shape-3"></div><div className="shape shape-4"></div>
+            <div className="shape shape-5"></div>
+          </div>
+          <div className="theme-shift-overlay"></div>
+          <div className="ember-particles" aria-hidden="true"></div>
+          <div className="section-grain"></div>
+          <div className="wrapper">
+            <h2 className="mega-heading center">
+              <span className="mh-row mh-small"><LineReveal>THE STARS FADE... THE FORGE IGNITES</LineReveal></span>
+              <span className="mh-row" data-animation="char"><CharSplit text="LET'S TALK " /><span className="stroke-text-inline"><CharSplit text="ABOUT WORK:" /></span></span>
+            </h2>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== PORTFOLIO — MEDIEVAL / FIRE THEME ===== */
+    function PortfolioSection() {
+      const ref = useRef(null);
+
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        el.querySelectorAll('[data-animation="char"]').forEach(row => {
+          gsap.to(row.querySelectorAll('.char'), {
+            y: 0, opacity: 1, rotation: 0, stagger: 0.02, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: row, start: 'top 85%' }
+          });
+        });
+        el.querySelectorAll('[data-animation="slide-up"] .line-inner').forEach(li => {
+          gsap.to(li, { y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: li.closest('.split-text'), start: 'top 88%' } });
+        });
+
+        // Horizontal scroll
+        const track = el.querySelector('.horizontal-track');
+        if (track) {
+          const cards = track.querySelectorAll('.folio-card');
+          let totalW = 0;
+          cards.forEach(c => totalW += c.offsetWidth);
+          totalW += (cards.length - 1) * 32;
+          const moveX = Math.max(0, totalW - window.innerWidth + 80);
+          gsap.to(track, {
+            x: () => -moveX, ease: 'none',
+            scrollTrigger: { trigger: el, start: 'top top', end: () => '+=' + moveX, scrub: 1, pin: true, anticipatePin: 1, invalidateOnRefresh: true }
+          });
+        }
+
+        // 3D tilt  
+        el.querySelectorAll('.folio-card').forEach(card => {
+          card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left, y = e.clientY - rect.top;
+            const midX = rect.width/2, midY = rect.height/2;
+            gsap.to(card, { rotateX: ((y-midY)/midY)*-12, rotateY: ((x-midX)/midX)*12, y: -10, duration: 0.3, ease: 'power2.out', transformPerspective: 800 });
+          });
+          card.addEventListener('mouseleave', () => {
+            gsap.to(card, { rotateX: 0, rotateY: 0, y: 0, duration: 0.6, ease: 'elastic.out(1,0.4)' });
+          });
+        });
+      }, []);
+
+      return (
+        <section className="full-section folio-section medieval-theme" id="projects" ref={ref}>
+          <div className="medieval-overlay" aria-hidden="true"></div>
+          <div className="torch-glow torch-left" aria-hidden="true"></div>
+          <div className="torch-glow torch-right" aria-hidden="true"></div>
+          <div className="section-grain"></div>
+          <div className="wrapper">
+            <div className="folio-header">
+              <h2 className="mega-heading">
+                <span className="mh-row" data-animation="char"><CharSplit text="PORT" /><span className="stroke-text-inline"><CharSplit text="FOLIO" /></span></span>
+              </h2>
+              <div className="folio-icon icon-bounce"><span>&lt;/&gt;</span></div>
+            </div>
+            <div className="folio-intro">
+              <div className="folio-words">
+                <span><LineReveal>PROJECTS THAT YOU</LineReveal></span>
+                <span><LineReveal>MIGHT WANT TO SEE</LineReveal></span>
+              </div>
+              <div className="folio-label"><span className="label-dot"></span> WHAT HAVE I DONE?</div>
+            </div>
+            <div className="folio-desc">
+              <p><LineReveal>Building scalable applications covering diverse domains — from system-level programming in C to interactive web applications and cloud-native deployments.</LineReveal></p>
+              <a href="https://github.com/abhijaypandey14?tab=repositories" target="_blank" rel="noopener noreferrer" className="link-arrow magnetic-wrap">
+                <span className="magnetic-area" data-strength="10">SEE ALL PROJECTS <ArrowSVG /></span>
+              </a>
+            </div>
+          </div>
+          <div className="horizontal-wrap">
+            <div className="horizontal-track">
+              {PROJECTS.map((p, i) => (
+                <a key={i} href={p.url} target="_blank" rel="noopener noreferrer" className="folio-card" data-cursor="View">
+                  <div className="fc-preview"><div className="fc-distort" data-text={p.code}></div><span>{p.code}</span></div>
+                  <div className="fc-info">
+                    <h3>{p.name}</h3>
+                    <p>{p.desc}</p>
+                    <span className="fc-tags">{p.tags}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== EXPERTISE — CYBER / NEON THEME ===== */
+    function ExpertiseSection() {
+      const [activeTab, setActiveTab] = useState('dev');
+      const ref = useRef(null);
+
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        el.querySelectorAll('[data-animation="char"]').forEach(row => {
+          gsap.to(row.querySelectorAll('.char'), {
+            y: 0, opacity: 1, rotation: 0, stagger: 0.02, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: row, start: 'top 85%' }
+          });
+        });
+        el.querySelectorAll('[data-animation="slide-up"] .line-inner').forEach(li => {
+          gsap.to(li, { y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: li.closest('.split-text'), start: 'top 88%' } });
+        });
+      }, []);
+
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        const panel = el.querySelector('.skill-panel.active');
+        if (!panel) return;
+        panel.querySelectorAll('.skill-bar-fill').forEach(fill => {
+          fill.style.width = '0%';
+          fill.classList.remove('animated');
+          const w = fill.getAttribute('data-width');
+          gsap.to(fill, { width: w + '%', duration: 1.2, ease: 'power3.out', delay: 0.15, onComplete: () => fill.classList.add('animated') });
+        });
+      }, [activeTab]);
+
+      const tabs = [['dev','DEVELOPMENT'],['ai','AI / ML'],['tech','TECHNOLOGIES']];
+
+      return (
+        <section className="full-section expertise-section cyber-theme" id="skills" data-speed="0.95" ref={ref}>
+          <div className="cyber-grid-bg" aria-hidden="true"></div>
+          <div className="cyber-scanline" aria-hidden="true"></div>
+          <div className="section-grain"></div>
+          <div className="wrapper">
+            <h2 className="mega-heading">
+              <span className="mh-row" data-animation="char"><CharSplit text="EXPERTISE " /><span className="stroke-text-inline"><CharSplit text="& SKILLS" /></span></span>
+            </h2>
+            <div className="exp-desc">
+              <p><LineReveal>My work spans building intelligent AI/ML models to deploying scalable cloud-native applications. Modern web technologies and security best practices — creating robust, data-driven systems across the full stack.</LineReveal></p>
+              <a href="https://github.com/abhijaypandey14" target="_blank" rel="noopener noreferrer" className="link-arrow magnetic-wrap">
+                <span className="magnetic-area" data-strength="10">SEE ALL EXPERTISE <ArrowSVG /></span>
+              </a>
+            </div>
+            <div className="skill-tabs">
+              {tabs.map(([key, label]) => (
+                <button key={key} className={`skill-tab btn-ripple ${activeTab === key ? 'active' : ''}`} onClick={() => setActiveTab(key)}>{label}</button>
+              ))}
+            </div>
+            <div className="skill-panels">
+              {Object.entries(SKILLS).map(([key, items]) => (
+                <div key={key} className={`skill-panel ${activeTab === key ? 'active' : ''}`}>
+                  <div className="sp-grid">
+                    {items.map((s, i) => (
+                      <div key={i} className="sp-item">
+                        <div className="sp-top"><span className="sp-name">{s.name}</span><span className="sp-pct">{s.pct}%</span></div>
+                        <div className="skill-bar"><div className="skill-bar-fill" data-width={s.pct}></div></div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== MARQUEE ===== */
+    function MarqueeSection() {
+      const items = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS, ...MARQUEE_ITEMS];
+      return (
+        <section className="marquee-section">
+          <div className="marquee-track">
+            <div className="marquee-content">
+              {items.map((s, i) => (
+                <React.Fragment key={i}>
+                  <span>{s}</span><span className="m-dot">&#9670;</span>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== CERTIFICATIONS ===== */
+    function CertsSection() {
+      const ref = useRef(null);
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        gsap.fromTo(el.querySelectorAll('.cert-card'),
+          { y: 60, opacity: 0, scale: 0.9 },
+          { y: 0, opacity: 1, scale: 1, stagger: 0.15, duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: el.querySelector('.certs-grid'), start: 'top 85%' }
+          });
+        el.querySelectorAll('[data-animation="slide-up"] .line-inner').forEach(li => {
+          gsap.to(li, { y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: li.closest('.split-text'), start: 'top 88%' } });
+        });
+      }, []);
+
+      return (
+        <section className="full-section certs-section" data-speed="0.95" ref={ref}>
+          <div className="wrapper">
+            <div className="certs-hero">
+              <div className="certs-number">3+</div>
+              <div className="certs-label">
+                <h3>Certifications</h3>
+                <p><LineReveal>Recognized by Amazon Web Services and IBM for expertise in Cloud, Data, and Generative AI.</LineReveal></p>
+              </div>
+            </div>
+            <div className="certs-grid">
+              {CERTS.map((c, i) => (
+                <div key={i} className="cert-card" data-cursor="Explore">
+                  <div className="cert-badge"><img src={c.img} alt={c.alt} loading="lazy" /></div>
+                  <div className="cert-info">
+                    <span className="cert-name">{c.name}</span>
+                    <span className="cert-cat">{c.cat}</span>
+                    <span className="cert-from">{c.from}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== EXPERIENCE — NOIR THEME ===== */
+    function ExperienceSection() {
+      const ref = useRef(null);
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        el.querySelectorAll('[data-animation="char"]').forEach(row => {
+          gsap.to(row.querySelectorAll('.char'), {
+            y: 0, opacity: 1, rotation: 0, stagger: 0.02, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: row, start: 'top 85%' }
+          });
+        });
+        gsap.fromTo(el.querySelectorAll('.xp-card'),
+          { y: 80, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.2, duration: 1, ease: 'power3.out',
+            scrollTrigger: { trigger: el.querySelector('.xp-list'), start: 'top 85%' }
+          });
+        el.querySelectorAll('[data-animation="slide-up"] .line-inner').forEach(li => {
+          gsap.to(li, { y: 0, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: li.closest('.split-text'), start: 'top 88%' } });
+        });
+      }, []);
+
+      return (
+        <section className="full-section xp-section noir-theme" id="experience" data-speed="0.9" ref={ref}>
+          <div className="noir-overlay" aria-hidden="true"></div>
+          <div className="section-grain"></div>
+          <div className="wrapper">
+            <h2 className="mega-heading">
+              <span className="mh-row" data-animation="char"><CharSplit text="EXPERI" /><span className="stroke-text-inline"><CharSplit text="ENCE" /></span></span>
+            </h2>
+            <div className="xp-list">
+              <div className="xp-card">
+                <div className="xp-left"><span className="xp-date">12/2025 — 01/2026</span><div className="xp-timeline"><div className="xp-dot"></div><div className="xp-line-v"></div></div></div>
+                <div className="xp-right">
+                  <h3>Campus Ambassador &amp; Leadership</h3>
+                  <span className="xp-company">IIT Delhi (eDC) | IIT Kanpur (E-Cell) | IIT BHU</span>
+                  <p><LineReveal>Spearheaded outreach for three premier IIT summits, engaging a 10,000+ student audience and driving record participation in national-level entrepreneurship and technical events.</LineReveal></p>
+                </div>
+              </div>
+              <div className="xp-card">
+                <div className="xp-left"><span className="xp-date">2023 — Present</span><div className="xp-timeline"><div className="xp-dot"></div><div className="xp-line-v"></div></div></div>
+                <div className="xp-right">
+                  <h3>B.Tech Computer Science &amp; Engineering</h3>
+                  <span className="xp-company">Galgotias University — GPA 8.2</span>
+                  <p><LineReveal>Pursuing Bachelor of Technology with focus on Data Science, AI/ML, and Cloud Computing. Actively contributing to open-source projects and building scalable applications.</LineReveal></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== CONTACT — ETHEREAL / AURORA THEME ===== */
+    function ContactSection() {
+      const ref = useRef(null);
+      const canvasRef = useRef(null);
+
+      useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas || typeof THREE === 'undefined') return;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+        camera.position.z = 6;
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const knot = new THREE.Mesh(
+          new THREE.TorusKnotGeometry(2, 0.5, 200, 20, 2, 3),
+          new THREE.MeshBasicMaterial({ color: 0xece7e1, wireframe: true, transparent: true, opacity: 0.04 })
+        );
+        scene.add(knot);
+
+        // Aurora particles
+        const aCount = 600, aPos = new Float32Array(aCount * 3);
+        for (let i = 0; i < aCount; i++) {
+          aPos[i*3] = (Math.random()-0.5)*12;
+          aPos[i*3+1] = (Math.random()-0.5)*8;
+          aPos[i*3+2] = (Math.random()-0.5)*6;
+        }
+        const aGeo = new THREE.BufferGeometry();
+        aGeo.setAttribute('position', new THREE.BufferAttribute(aPos, 3));
+        const aurora = new THREE.Points(aGeo, new THREE.PointsMaterial({ size: 0.025, color: 0x66ffcc, transparent: true, opacity: 0.12, sizeAttenuation: true }));
+        scene.add(aurora);
+
+        let animId;
+        function animate() {
+          animId = requestAnimationFrame(animate);
+          knot.rotation.x += 0.0015; knot.rotation.y += 0.002;
+          aurora.rotation.y += 0.0003;
+          renderer.render(scene, camera);
+        }
+        animate();
+        const onResize = () => {
+          const w = canvas.clientWidth, h = canvas.clientHeight;
+          if (w && h) { camera.aspect = w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); }
+        };
+        window.addEventListener('resize', onResize);
+        return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', onResize); renderer.dispose(); };
+      }, []);
+
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        el.querySelectorAll('[data-animation="char"]').forEach(row => {
+          gsap.to(row.querySelectorAll('.char'), {
+            y: 0, opacity: 1, rotation: 0, stagger: 0.02, duration: 0.7, ease: 'power3.out',
+            scrollTrigger: { trigger: row, start: 'top 85%' }
+          });
+        });
+        gsap.fromTo(el.querySelector('.contact-body'), { y: 50, opacity: 0 }, { y: 0, opacity: 1, duration: 1, ease: 'power3.out', scrollTrigger: { trigger: '.contact-body', start: 'top 85%' } });
+        gsap.fromTo(el.querySelector('.contact-action'), { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 1, ease: 'back.out(1.7)', scrollTrigger: { trigger: '.contact-action', start: 'top 85%' } });
+        gsap.fromTo(el.querySelectorAll('.contact-links a'), { y: 25, opacity: 0 }, { y: 0, opacity: 1, stagger: 0.1, duration: 0.6, ease: 'power3.out', scrollTrigger: { trigger: '.contact-links', start: 'top 90%' } });
+      }, []);
+
+      return (
+        <section className="full-section contact-section aurora-theme" id="contact" ref={ref}>
+          <canvas id="contact-canvas" ref={canvasRef}></canvas>
+          <div className="aurora-bg" aria-hidden="true"></div>
+          <div className="section-grain"></div>
+          <div className="wrapper">
+            <h2 className="mega-heading">
+              <span className="mh-row" data-animation="char"><CharSplit text="WORK " /><span className="stroke-text-inline"><CharSplit text="TOGETHER" /></span></span>
+            </h2>
+            <div className="contact-body">
+              <p>How about starting to build something incredible together? If this sounds good to you, feel free to hit the button and let me know what you have in mind.</p>
+            </div>
+            <div className="contact-action">
+              <a href="mailto:abhijaypandeygu@gmail.com" className="btn-big magnetic-wrap btn-ripple">
+                <span className="magnetic-area" data-strength="20">
+                  <span>START A PROJECT</span>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg>
+                </span>
+              </a>
+            </div>
+            <div className="contact-links">
+              <a href="mailto:abhijaypandeygu@gmail.com" className="magnetic-wrap btn-ripple"><span className="magnetic-area" data-strength="15">E-MAIL <ArrowSVG /></span></a>
+              <a href="https://github.com/abhijaypandey14" target="_blank" rel="noopener noreferrer" className="magnetic-wrap btn-ripple"><span className="magnetic-area" data-strength="15">GITHUB <ArrowSVG /></span></a>
+              <a href="https://www.linkedin.com/in/abhijay-pandey-387211293" target="_blank" rel="noopener noreferrer" className="magnetic-wrap btn-ripple"><span className="magnetic-area" data-strength="15">LINKEDIN <ArrowSVG /></span></a>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* ===== FOOTER ===== */
+    function SiteFooter() {
+      const ref = useRef(null);
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        gsap.fromTo(el.querySelectorAll('.footer-grid > div'),
+          { y: 30, opacity: 0 },
+          { y: 0, opacity: 1, stagger: 0.1, duration: 0.6, ease: 'power3.out',
+            scrollTrigger: { trigger: el, start: 'top 92%' }
+          });
+      }, []);
+      return (
+        <footer className="site-footer" ref={ref}>
+          <div className="wrapper footer-grid">
+            <div className="f-left">
+              <span className="f-name">Abhijay Pandey</span>
+              <span className="f-copy">&copy; 2026. All rights reserved.</span>
+            </div>
+            <div className="f-center">
+              <span>QUICK LINKS</span>
+              <a href="#about">About</a>
+              <a href="#projects">Projects</a>
+              <a href="#contact">Contact</a>
+            </div>
+            <div className="f-right">
+              <span>abhijaypandeygu@gmail.com</span>
+              <span>+91 8285980400</span>
+            </div>
+          </div>
+        </footer>
+      );
+    }
+
+    /* ===== APP ===== */
+    function App() {
+      const [loaded, setLoaded] = useState(false);
+      const [menuOpen, setMenuOpen] = useState(false);
+      const lenisRef = useRef(null);
+
+      useEffect(() => {
+        const lenis = new Lenis({
+          duration: 1.4,
+          easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          orientation: 'vertical',
+          smoothWheel: true,
+        });
+        lenisRef.current = lenis;
+        lenis.on('scroll', ScrollTrigger.update);
+        gsap.ticker.add((time) => lenis.raf(time * 1000));
+        gsap.ticker.lagSmoothing(0);
+
+        let lastY = 0;
+        lenis.on('scroll', (e) => {
+          const y = e.animatedScroll || 0;
+          const nav = document.getElementById('nav');
+          if (nav) {
+            nav.classList.toggle('hide', y > lastY && y > 120);
+            nav.classList.toggle('scrolled', y > 50);
+          }
+          lastY = y;
+        });
+
+        return () => lenis.destroy();
+      }, []);
+
+      useEffect(() => {
+        if (lenisRef.current) {
+          if (menuOpen) lenisRef.current.stop();
+          else lenisRef.current.start();
+        }
+        document.body.style.overflow = menuOpen ? 'hidden' : '';
+      }, [menuOpen]);
+
+      useEffect(() => {
+        if (!loaded) return;
+
+        // Magnetic
+        document.querySelectorAll('.magnetic-wrap').forEach(wrap => {
+          const area = wrap.querySelector('.magnetic-area');
+          if (!area) return;
+          const strength = parseFloat(area.dataset.strength || 20);
+          wrap.addEventListener('mousemove', (e) => {
+            const rect = wrap.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width/2;
+            const y = e.clientY - rect.top - rect.height/2;
+            gsap.to(area, { x: x/rect.width*strength, y: y/rect.height*strength, duration: 0.3, ease: 'power2.out' });
+          });
+          wrap.addEventListener('mouseleave', () => gsap.to(area, { x: 0, y: 0, duration: 0.5, ease: 'elastic.out(1,0.3)' }));
+        });
+
+        // Ripples
+        document.querySelectorAll('.btn-ripple').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const rect = btn.getBoundingClientRect();
+            const ripple = document.createElement('span');
+            ripple.classList.add('ripple-effect');
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (e.clientX - rect.left - size/2) + 'px';
+            ripple.style.top = (e.clientY - rect.top - size/2) + 'px';
+            btn.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+          });
+        });
+
+        // Anchor smooth
+        document.querySelectorAll('a[href^="#"]').forEach(a => {
+          a.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = a.getAttribute('href');
+            if (target && lenisRef.current) lenisRef.current.scrollTo(target, { offset: 0, duration: 1.5 });
+          });
+        });
+
+        // Cinematic section reveals
+        document.querySelectorAll('.full-section').forEach(section => {
+          gsap.fromTo(section,
+            { opacity: 0.3 },
+            { opacity: 1, duration: 1.2, ease: 'power2.out',
+              scrollTrigger: { trigger: section, start: 'top 92%', end: 'top 50%', scrub: 0.6 }
+            });
+        });
+
+        // Parallax
+        document.querySelectorAll('[data-speed]').forEach(el => {
+          const speed = parseFloat(el.dataset.speed || 1);
+          gsap.to(el, { yPercent: () => (1-speed)*50, ease: 'none', scrollTrigger: { trigger: el, start: 'top bottom', end: 'bottom top', scrub: 1 } });
+        });
+
+        gsap.to('.hero-bg-word', { yPercent: 30, ease: 'none', scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 0.5 } });
+
+        const mc = document.querySelector('.marquee-content');
+        if (mc) gsap.to(mc, { x: '-=300', ease: 'none', scrollTrigger: { trigger: '.marquee-section', start: 'top bottom', end: 'bottom top', scrub: 1 } });
+
+        document.querySelectorAll('.shape').forEach((shape, i) => {
+          gsap.to(shape, { y: i%2===0 ? -100 : 100, rotation: i%2===0 ? 25 : -25, ease: 'none', scrollTrigger: { trigger: '.trans-section', start: 'top bottom', end: 'bottom top', scrub: 1 } });
+        });
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+          link.addEventListener('mouseenter', () => gsap.to(link, { y: -2, duration: 0.2 }));
+          link.addEventListener('mouseleave', () => gsap.to(link, { y: 0, duration: 0.2 }));
+        });
+
+        document.querySelectorAll('.icon-bounce').forEach(el => {
+          el.addEventListener('mouseenter', () => { el.style.animationPlayState='paused'; gsap.to(el,{scale:1.15,duration:0.3,ease:'back.out(2)'}); });
+          el.addEventListener('mouseleave', () => { el.style.animationPlayState='running'; gsap.to(el,{scale:1,duration:0.3}); });
+        });
+
+        setTimeout(() => ScrollTrigger.refresh(), 500);
+
+      }, [loaded]);
+
+      return (
+        <>
+          <Preloader onComplete={() => setLoaded(true)} />
+          <CustomCursor />
+          <Navigation menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
+          <ProgressBar />
+          <AudioPlayer />
+          <HeroSection loaded={loaded} />
+          <SectionDivider type="glow" />
+          <EnthusiastSection />
+          <SectionDivider type="cosmic" />
+          <AboutSection />
+          <ThemeShiftSection />
+          <PortfolioSection />
+          <SectionDivider type="ember" />
+          <ExpertiseSection />
+          <SectionDivider type="neon" />
+          <MarqueeSection />
+          <SectionDivider type="gradient" />
+          <CertsSection />
+          <SectionDivider type="gradient" />
+          <ExperienceSection />
+          <SectionDivider type="glow" />
+          <ContactSection />
+          <SiteFooter />
+        </>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

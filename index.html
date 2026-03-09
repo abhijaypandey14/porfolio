@@ -396,6 +396,39 @@ function AudioPlayer({ activeTheme, musicConsent }) {
   );
 }
 
+function TypewriterText({ words, typingSpeed = 80, deletingSpeed = 45, pauseTime = 1200 }) {
+  const [text, setText] = React.useState('');
+  const [wordIndex, setWordIndex] = React.useState(0);
+  const [isDeleting, setIsDeleting] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!words || words.length === 0) return;
+    const currentWord = words[wordIndex % words.length];
+    const nextText = isDeleting
+      ? currentWord.substring(0, text.length - 1)
+      : currentWord.substring(0, text.length + 1);
+
+    const timeout = setTimeout(() => {
+      setText(nextText);
+      if (!isDeleting && nextText === currentWord) {
+        setTimeout(() => setIsDeleting(true), pauseTime);
+      } else if (isDeleting && nextText === '') {
+        setIsDeleting(false);
+        setWordIndex((prev) => (prev + 1) % words.length);
+      }
+    }, isDeleting ? deletingSpeed : typingSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [text, isDeleting, wordIndex, words, typingSpeed, deletingSpeed, pauseTime]);
+
+  return (
+    <span className="typewriter" aria-live="polite">
+      {text}
+      <span className="typewriter-cursor">|</span>
+    </span>
+  );
+}
+
 /* ===== HERO ===== */
 function HeroSection({ loaded }) {
   const canvasRef = React.useRef(null);
@@ -512,6 +545,7 @@ function HeroSection({ loaded }) {
         </h1>
         <div className="hero-sub">
           <p>More than a portfolio &mdash; a cinematic journey through code, creativity, and the relentless pursuit of engineering excellence.</p>
+          <p className="hero-type-row">Building with <TypewriterText words={['AI/ML', 'Cloud Computing', 'Full Stack Systems', 'Cybersecurity']} /></p>
         </div>
         <a href="#about" className="hero-btn magnetic-wrap btn-ripple">
           <span className="magnetic-area" data-strength="15">

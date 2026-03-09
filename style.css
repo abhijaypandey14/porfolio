@@ -236,6 +236,12 @@ ul { list-style: none; }
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
 }
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
 .hero-btn {
   display: inline-flex; align-items: center; gap: 12px;
   padding: 16px 36px; border: 1px solid rgba(236,231,225,0.2);
@@ -246,6 +252,15 @@ ul { list-style: none; }
 .hero-btn:hover {
   background: var(--white); color: var(--black);
   border-color: var(--white); transform: scale(1.02);
+}
+.hero-btn-secondary {
+  border-color: rgba(195,255,55,0.25);
+  color: var(--highlight);
+}
+.hero-btn-secondary:hover {
+  background: rgba(195,255,55,0.12);
+  border-color: var(--highlight);
+  color: var(--highlight);
 }
 .arrow-circle {
   width: 36px; height: 36px; border-radius: 50%;
@@ -422,6 +437,46 @@ ul { list-style: none; }
   transition: color 0.3s;
 }
 .link-arrow:hover { color: var(--highlight); }
+
+/* GitHub Activity */
+.github-activity {
+  margin-top: 64px;
+  padding-top: 48px;
+  border-top: 1px solid rgba(236,231,225,0.05);
+}
+.activity-title {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  color: var(--highlight);
+}
+.activity-graph {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(236,231,225,0.02);
+  padding: 16px;
+  border: 1px solid rgba(236,231,225,0.06);
+}
+.activity-graph img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.github-stats {
+  display: flex;
+  justify-content: center;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.github-stats img {
+  width: 100%;
+  max-width: 500px;
+  height: auto;
+}
 
 /* 3D Cube */
 .cube-scene { perspective: 350px; width: 160px; height: 160px; }
@@ -935,7 +990,8 @@ ul { list-style: none; }
 @media (max-width: 480px) {
   .hero-title { font-size: clamp(1.8rem, 12vw, 2.8rem); }
   .hero-sub p { font-size: 0.85rem; }
-  .hero-btn { padding: 14px 28px; font-size: 0.65rem; }
+  .hero-actions { flex-direction: column; width: 100%; }
+  .hero-btn { padding: 14px 28px; font-size: 0.65rem; width: 100%; justify-content: center; }
   .arrow-circle { width: 30px; height: 30px; }
   .folio-card { width: 260px; height: 340px; }
   .fc-preview { font-size: 3.5rem; }

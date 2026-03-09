@@ -282,27 +282,107 @@ function ProgressBar() {
 }
 
 /* ===== AUDIO PLAYER ===== */
-function AudioPlayer() {
+const THEME_AUDIO = {
+  SPACE: 'audio/interstellar.mp3',
+  EXPLORE: 'audio/interstellar.mp3',
+  ANIME: 'audio/anime_piano.mp3',
+  GOT: 'audio/got.mp3',
+  HOGWARTS: 'audio/harry_potter.mp3',
+  CERTIFICATIONS: 'audio/harry_potter.mp3',
+  TRANSFORMERS: 'audio/transformers.mp3',
+  CONTACT: 'audio/naruto_despair.mp3',
+};
+
+function AudioPlayer({ activeTheme, musicConsent }) {
   const [playing, setPlaying] = React.useState(false);
-  const audioRef = React.useRef(null);
+  const audioMapRef = React.useRef({});
+  const currentTrackRef = React.useRef(null);
+  const fadeDuration = 1.2;
 
-  React.useEffect(() => {
-    audioRef.current = new Audio('Game of Thrones.mp3');
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.25;
-    return () => { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; } };
-  }, []);
-
-  const toggle = () => {
-    if (!audioRef.current) return;
-    if (playing) audioRef.current.pause();
-    else audioRef.current.play().catch(() => {});
-    setPlaying(!playing);
+  // Create/get Audio instance for a given track src
+  const getAudio = (src) => {
+    if (!audioMapRef.current[src]) {
+      const a = new Audio(src);
+      a.loop = true;
+      a.volume = 0;
+      a.preload = 'auto';
+      audioMapRef.current[src] = a;
+    }
+    return audioMapRef.current[src];
   };
 
+  // Crossfade to the new theme track
+  React.useEffect(() => {
+    if (!playing) return;
+    const newSrc = THEME_AUDIO[activeTheme] || THEME_AUDIO.SPACE;
+    if (currentTrackRef.current && currentTrackRef.current.src && currentTrackRef.current.src.endsWith(newSrc.replace(/.*\//, ''))) return;
+
+    const oldAudio = currentTrackRef.current;
+    const newAudio = getAudio(newSrc);
+    currentTrackRef.current = newAudio;
+
+    // Fade out old
+    if (oldAudio && oldAudio !== newAudio) {
+      gsap.to(oldAudio, { volume: 0, duration: fadeDuration, ease: 'power2.inOut', onComplete: () => { oldAudio.pause(); } });
+    }
+
+    // Fade in new
+    newAudio.play().catch(() => {});
+    gsap.to(newAudio, { volume: 0.25, duration: fadeDuration, ease: 'power2.inOut' });
+  }, [activeTheme, playing]);
+
+  // Cleanup
+  React.useEffect(() => {
+    return () => {
+      Object.values(audioMapRef.current).forEach(a => { a.pause(); a.src = ''; });
+      audioMapRef.current = {};
+    };
+  }, []);
+
+  // Respect consent choice. "Yes" starts current theme music, "No" keeps audio paused.
+  React.useEffect(() => {
+    if (musicConsent === true && !playing) {
+      const src = THEME_AUDIO[activeTheme] || THEME_AUDIO.SPACE;
+      const audio = getAudio(src);
+      currentTrackRef.current = audio;
+      audio.play().catch(() => {});
+      gsap.to(audio, { volume: 0.25, duration: 0.6 });
+      setPlaying(true);
+    }
+    if (musicConsent === false && playing) {
+      const current = currentTrackRef.current;
+      if (current) {
+        gsap.to(current, { volume: 0, duration: 0.4, onComplete: () => current.pause() });
+      }
+      setPlaying(false);
+    }
+  }, [musicConsent]);
+
+  const toggle = () => {
+    if (playing) {
+      // Pause current track
+      const current = currentTrackRef.current;
+      if (current) {
+        gsap.to(current, { volume: 0, duration: 0.4, onComplete: () => current.pause() });
+      }
+      setPlaying(false);
+    } else {
+      // Start playing current theme's track
+      const src = THEME_AUDIO[activeTheme] || THEME_AUDIO.SPACE;
+      const audio = getAudio(src);
+      currentTrackRef.current = audio;
+      audio.play().catch(() => {});
+      gsap.to(audio, { volume: 0.25, duration: 0.6 });
+      setPlaying(true);
+    }
+  };
+
+  const trackLabel = activeTheme || 'SPACE';
+  const showPromptHint = musicConsent === null;
+
   return (
-    <button className={`audio-toggle ${playing ? 'playing' : ''}`} onClick={toggle} aria-label="Toggle GoT theme">
-      <span className="audio-label">{playing ? 'PLAYING' : 'PLAY THEME'}</span>
+    <button className={`audio-toggle ${playing ? 'playing' : ''}`} onClick={toggle} aria-label="Toggle theme music">
+      <span className="audio-label">{showPromptHint ? 'MUSIC ?' : (playing ? trackLabel : 'PLAY THEME')}</span>
       {playing ? (
         <div className="audio-bars"><span></span><span></span><span></span><span></span></div>
       ) : (
@@ -938,7 +1018,7 @@ function ExperienceSection() {
       <div className="section-grain"></div>
       <div className="wrapper">
         <h2 className="mega-heading">
-          <span className="mh-row" data-animation="char"><CharSplit text="EXPERI" /><span className="stroke-text-inline"><CharSplit text="ENCE" /></span></span>
+          <span className="mh-row" data-animation="char"><CharSplit text="EXPERIENCE" /></span>
         </h2>
         <div className="xp-list">
           <div className="xp-card">
@@ -1122,12 +1202,30 @@ function SectionIndicator() {
   );
 }
 
+function MusicConsentPrompt({ visible, onChoice }) {
+  if (!visible) return null;
+  return (
+    <div className="music-consent" role="dialog" aria-modal="true" aria-label="Music permission">
+      <div className="music-consent-card">
+        <p className="music-consent-title">Play theme music while you scroll?</p>
+        <p className="music-consent-sub">You can change this anytime with the music button.</p>
+        <div className="music-consent-actions">
+          <button type="button" className="music-consent-btn allow" onClick={() => onChoice(true)}>Yes, play</button>
+          <button type="button" className="music-consent-btn deny" onClick={() => onChoice(false)}>No thanks</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ===== MAIN APP ===== */
 gsap.registerPlugin(ScrollTrigger);
 
 function App() {
   const [loaded, setLoaded] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [activeTheme, setActiveTheme] = React.useState('SPACE');
+  const [musicConsent, setMusicConsent] = React.useState(null);
   const lenisRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -1260,6 +1358,7 @@ function App() {
     function applyTheme(accent, name, navId) {
       if (currentTheme === name) return;
       currentTheme = name;
+      setActiveTheme(name);
       document.documentElement.style.setProperty('--active-accent', accent);
       const flash = document.getElementById('theme-flash');
       if (flash) {
@@ -1299,7 +1398,8 @@ function App() {
       <Preloader onComplete={() => setLoaded(true)} />
       <CustomCursor />
       <Navigation menuOpen={menuOpen} setMenuOpen={setMenuOpen} />
-      <AudioPlayer />
+      <MusicConsentPrompt visible={loaded && musicConsent === null} onChoice={setMusicConsent} />
+      <AudioPlayer activeTheme={activeTheme} musicConsent={musicConsent} />
       <BackToTop />
       <ThemeFlash />
       <SectionIndicator />

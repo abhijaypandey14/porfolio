@@ -171,10 +171,10 @@ ul { list-style: none; }
   overflow: hidden; padding: 120px 48px 80px;
 }
 #hero-canvas {
-  position: absolute; top: 0; right: 0; width: 55%; height: 100%;
+  position: absolute; top: 0; right: 0; width: 62%; height: 100%;
   z-index: 1;
-  mask-image: radial-gradient(ellipse 80% 80% at 60% 50%, black 20%, transparent 80%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 60% 50%, black 20%, transparent 80%);
+  mask-image: radial-gradient(ellipse 85% 85% at 62% 52%, black 30%, transparent 82%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 85% at 62% 52%, black 30%, transparent 82%);
 }
 .hero-overlay {
   position: absolute; inset: 0; z-index: 2;
@@ -241,6 +241,25 @@ ul { list-style: none; }
   gap: 16px;
   flex-wrap: wrap;
   align-items: center;
+}
+.hero-3d-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+  max-width: 560px;
+}
+.hero-3d-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(236,231,225,0.16);
+  background: linear-gradient(135deg, rgba(236,231,225,0.06), rgba(123,140,255,0.12));
+  font-size: 0.62rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(236,231,225,0.8);
 }
 .hero-btn {
   display: inline-flex; align-items: center; gap: 12px;
@@ -957,7 +976,12 @@ ul { list-style: none; }
   .nav { padding: 14px 20px; }
   .hero { padding: 80px 20px 60px; }
   .hero-title { font-size: clamp(2.2rem, 10vw, 3.5rem); }
-  #hero-canvas { width: 100%; opacity: 0.4; }
+  #hero-canvas {
+    width: 100%;
+    opacity: 0.55;
+    mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, black 35%, transparent 88%);
+    -webkit-mask-image: radial-gradient(ellipse 95% 95% at 50% 50%, black 35%, transparent 88%);
+  }
   .hero-overlay { background: linear-gradient(180deg, rgba(10,10,12,0.9) 0%, rgba(10,10,12,0.6) 50%, rgba(10,10,12,0.95) 100%); }
   .hero-meta { display: none; }
   .hero-scroll { bottom: 24px; left: 20px; }
@@ -985,12 +1009,15 @@ ul { list-style: none; }
   .audio-toggle { bottom: 16px; right: 16px; }
   .music-consent-card { padding: 20px 18px; }
   .music-consent-actions { flex-direction: column; }
+  .hero-3d-features { max-width: 100%; gap: 8px; }
 }
 
 @media (max-width: 480px) {
   .hero-title { font-size: clamp(1.8rem, 12vw, 2.8rem); }
   .hero-sub p { font-size: 0.85rem; }
   .hero-actions { flex-direction: column; width: 100%; }
+  .hero-3d-features { margin-top: 14px; }
+  .hero-3d-pill { font-size: 0.56rem; width: 100%; justify-content: center; }
   .hero-btn { padding: 14px 28px; font-size: 0.65rem; width: 100%; justify-content: center; }
   .arrow-circle { width: 30px; height: 30px; }
   .folio-card { width: 260px; height: 340px; }
